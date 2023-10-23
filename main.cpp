@@ -77,78 +77,75 @@ void printMinTime(std::vector<double> times)
 	std::cout << "The smallest number: " << minTime << " ms" << std::endl;
 }
 
-std::vector<std::vector<int>> splitArray(const std::vector<int>& inputArray, int K)
-{
-    if (K <= 0) {
-        throw std::runtime_error("Incorrect K value");
-    }
-    std::vector<std::vector<int>> result;
-    int arraySize = inputArray.size();
-    int subArraySize = arraySize / K;
-    int extraElements = arraySize % K;
-
-    int currentIndex = 0;
-    for (int i = 0; i < K; i++)
-    {
-        int subArrayLength = subArraySize + (extraElements-- > 0 ? 1 : 0);
-
-        if (subArrayLength > 0)
-        {
-            result.push_back(std::vector<int>(inputArray.begin() + currentIndex, inputArray.begin() + currentIndex + subArrayLength));
-            currentIndex += subArrayLength;
-        }
-    }
-
-    return result;
-}
-
 int ScalarProduction(const std::vector<int>& A, const std::vector<int>& B)
 {
+    if (A.size() != B.size())
+    {
+        throw std::runtime_error("Error: Vectors have different sizes");
+    }
+
     int result = 0;
-    for (int i = 0; i < A.size(); i++)
+    for (size_t i = 0; i < A.size(); ++i)
     {
         result += A[i] * B[i];
     }
     return result;
 }
 
-double myAlgorithm(int K, std::vector<int>& A, std::vector<int>& B)
+std::vector<std::vector<int>> splitVector(const std::vector<int>& vec, int numParts)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    std::vector<std::vector<int>> result(numParts);
+    int partSize = vec.size() / numParts;
+    int remainder = vec.size() % numParts;
 
-    if (A.size() != B.size())
+    int startIndex = 0;
+    for (int i = 0; i < numParts; ++i)
     {
-        throw std::runtime_error("Error: vectors have different sizes");
+        int partLength = partSize + (i < remainder ? 1 : 0);
+
+        if (partLength > 0)
+        {
+            result[i].assign(vec.begin() + startIndex, vec.begin() + startIndex + partLength);
+            startIndex += partLength;
+        }
     }
 
-    const int num_threads = 3; // Кількість потоків
-    std::vector<std::vector<int>> subArraysA = splitArray(A, K);
-    std::vector<std::vector<int>> subArraysB = splitArray(B, K);
+    return result;
+}
+
+
+double myAlgorithm(int K, std::vector<int>& A, std::vector<int>& B) {
+    if (K <= 0 || K > A.size())
+    {
+        throw std::runtime_error("Error: Invalid value of K");
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    std::vector<std::vector<int>> subArraysA = splitVector(A, K);
+    std::vector<std::vector<int>> subArraysB = splitVector(B, K);
 
     int totalResult = 0;
     std::mutex resultMutex;
 
+    std::vector<std::thread> threads;
+
     for (int i = 0; i < K; i++)
     {
-        std::vector<std::thread> threads;
+        threads.emplace_back(
+            [i, &resultMutex, &totalResult, &subArraysA, &subArraysB]()
+            {
+                int result = ScalarProduction(subArraysA[i], subArraysB[i]);
 
-        for (int j = 0; j < num_threads && i < K; j++, i++)
-        {
-            threads.emplace_back(
-                [i, &resultMutex, &totalResult, &subArraysA, &subArraysB]()
-                {
-                    int result = ScalarProduction(subArraysA[i], subArraysB[i]);
+                std::lock_guard<std::mutex> lock(resultMutex);
 
-                    std::lock_guard<std::mutex> lock(resultMutex);
+                totalResult += result;
+            });
+    }
 
-                    totalResult += result;
-                });
-        }
-
-        for (auto& thread : threads)
-        {
-            thread.join();
-        }
+    for (auto& thread : threads)
+    {
+        thread.join();
     }
 
     auto stop = std::chrono::high_resolution_clock::now();
@@ -191,8 +188,8 @@ void printMyAlgorithmKDependence(std::vector<int> arr)
 
 int main()
 {
-    std::vector<int> arr = generateRandomVector(300000000);
-    //std::vector<int> arr = generateRandomVector(3000); //DEBUG
+    //std::vector<int> arr = generateRandomVector(300000000);
+    std::vector<int> arr = generateRandomVector(3000); //DEBUG
 
     std::cout << "EXECUTION POLICY: none" << std::endl;
     double time1 = measureTransformReduceTime(arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; });
