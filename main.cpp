@@ -152,8 +152,8 @@ double myAlgorithm(int K, std::vector<int>& A, std::vector<int>& B) {
 
     std::chrono::duration<double, std::milli> duration = stop - start;
 
-    std::cout << "Result: " << totalResult << std::endl;
-    std::cout << "Execution time: " << duration.count() << " ms" << std::endl << std::endl;
+    //std::cout << "Result: " << totalResult << std::endl;
+    //std::cout << "Execution time: " << duration.count() << " ms" << std::endl << std::endl;
 
     return duration.count();
 }
@@ -161,26 +161,27 @@ double myAlgorithm(int K, std::vector<int>& A, std::vector<int>& B) {
 void printMyAlgorithmKDependence(std::vector<int> arr)
 {
     std::cout << "My Algorithm" << std::endl;
+    std::cout << "K" << "\t\t" << "Time, ms" << std::endl;
 
     int K = 1;
-    std::cout << "K = " << K << std::endl;
     double time1 = myAlgorithm(K, arr, arr);
+    std::cout << K << "\t\t" << time1 << std::endl;
 
     K = 50;
-    std::cout << "K = " << K << std::endl;
     double time2 = myAlgorithm(K, arr, arr);
+    std::cout << K << "\t\t" << time2 << std::endl;
 
     K = 100;
-    std::cout << "K = " << K << std::endl;
     double time3 = myAlgorithm(K, arr, arr);
+    std::cout << K << "\t\t" << time3 << std::endl;
 
     K = 250;
-    std::cout << "K = " << K << std::endl;
     double time4 = myAlgorithm(K, arr, arr);
+    std::cout << K << "\t\t" << time4 << std::endl;
 
     K = 500;
-    std::cout << "K = " << K << std::endl;
     double time5 = myAlgorithm(K, arr, arr);
+    std::cout << K << "\t\t" << time5 << std::endl;
 
     std::vector<double> times = { time1, time2, time3, time4, time5 };
     printMinTime(times);
@@ -189,7 +190,7 @@ void printMyAlgorithmKDependence(std::vector<int> arr)
 int main()
 {
     //std::vector<int> arr = generateRandomVector(300000000);
-    std::vector<int> arr = generateRandomVector(3000); //DEBUG
+    std::vector<int> arr = generateRandomVector(300000000); //DEBUG
 
     std::cout << "EXECUTION POLICY: none" << std::endl;
     double time1 = measureTransformReduceTime(arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; });
@@ -213,7 +214,7 @@ int main()
     {
         std::cout << "=";
     }
-    std::cout << std::endl << std::endl;  
+    std::cout << std::endl << std::endl;
 
     printMyAlgorithmKDependence(arr);
 
