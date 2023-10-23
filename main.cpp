@@ -74,11 +74,14 @@ void printMinTime(std::vector<double> times)
 		}
 	}
 
-	std::cout << "The smallest number: " << minTime << " ms" << std::endl << std::endl;
+	std::cout << "The smallest number: " << minTime << " ms" << std::endl;
 }
 
 std::vector<std::vector<int>> splitArray(const std::vector<int>& inputArray, int K)
 {
+    if (K <= 0) {
+        throw std::runtime_error("Incorrect K value");
+    }
     std::vector<std::vector<int>> result;
     int arraySize = inputArray.size();
     int subArraySize = arraySize / K;
@@ -115,7 +118,7 @@ double myAlgorithm(int K, std::vector<int>& A, std::vector<int>& B)
 
     if (A.size() != B.size())
     {
-        throw("Error: vectors have different sizes");
+        throw std::runtime_error("Error: vectors have different sizes");
     }
 
     const int num_threads = 3; // Кількість потоків
@@ -158,10 +161,38 @@ double myAlgorithm(int K, std::vector<int>& A, std::vector<int>& B)
     return duration.count();
 }
 
+void printMyAlgorithmKDependence(std::vector<int> arr)
+{
+    std::cout << "My Algorithm" << std::endl;
+
+    int K = 1;
+    std::cout << "K = " << K << std::endl;
+    double time1 = myAlgorithm(K, arr, arr);
+
+    K = 50;
+    std::cout << "K = " << K << std::endl;
+    double time2 = myAlgorithm(K, arr, arr);
+
+    K = 100;
+    std::cout << "K = " << K << std::endl;
+    double time3 = myAlgorithm(K, arr, arr);
+
+    K = 250;
+    std::cout << "K = " << K << std::endl;
+    double time4 = myAlgorithm(K, arr, arr);
+
+    K = 500;
+    std::cout << "K = " << K << std::endl;
+    double time5 = myAlgorithm(K, arr, arr);
+
+    std::vector<double> times = { time1, time2, time3, time4, time5 };
+    printMinTime(times);
+}
+
 int main()
 {
-    //std::vector<int> arr = generateRandomVector(300000000);
-    std::vector<int> arr = generateRandomVector(3000); //DEBUG
+    std::vector<int> arr = generateRandomVector(300000000);
+    //std::vector<int> arr = generateRandomVector(3000); //DEBUG
 
     std::cout << "EXECUTION POLICY: none" << std::endl;
     double time1 = measureTransformReduceTime(arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; });
@@ -181,8 +212,13 @@ int main()
     std::vector<double> times = { time1, time2, time3, time4, time5 };
     printMinTime(times);
 
-    std::cout << "My Algorithm" << std::endl;
-    double time6 = myAlgorithm(3, arr, arr);    
+    for (int i = 0; i < 20; i++)
+    {
+        std::cout << "=";
+    }
+    std::cout << std::endl << std::endl;  
+
+    printMyAlgorithmKDependence(arr);
 
     return 0;
 }
