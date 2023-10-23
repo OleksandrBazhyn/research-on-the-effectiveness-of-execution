@@ -82,7 +82,7 @@ void printMinTime(std::vector<TimeResult>& times)
 		}
 	}
 
-	std::cout << "The smallest number: " << minTime.name << "for\t" << minTime.result << " ms" << std::endl;
+	std::cout << "The smallest number: " << minTime.name << " for\t" << minTime.result << " ms" << std::endl;
 }
 
 int ScalarProduction(const std::vector<int>& A, const std::vector<int>& B)
