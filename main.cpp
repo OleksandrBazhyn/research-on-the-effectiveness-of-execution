@@ -1,4 +1,6 @@
 /*
+* Bazhyn Oleksandr
+* K-24
 * Compiler: GNU GCC 9
 * var number 7) transform_reduce
 */
@@ -65,16 +67,22 @@ double measureTransformReduceTime(InputIterator begin, InputIterator end, T init
     return duration.count();
 }
 
-void printMinTime(std::vector<double> times)
+struct TimeResult
 {
-	double minTime = times[0];
-    for (double time : times) {
-        if (time < minTime) {
+	std::string name;
+	double result;
+};
+
+void printMinTime(std::vector<TimeResult>& times)
+{
+    TimeResult minTime = times[0];
+    for (TimeResult time : times) {
+        if (time.result < minTime.result) {
 			minTime = time;
 		}
 	}
 
-	std::cout << "The smallest number: " << minTime << " ms" << std::endl;
+	std::cout << "The smallest number: " << minTime.name << "for\t" << minTime.result << " ms" << std::endl;
 }
 
 int ScalarProduction(const std::vector<int>& A, const std::vector<int>& B)
@@ -152,68 +160,69 @@ double myAlgorithm(int K, std::vector<int>& A, std::vector<int>& B) {
 
     std::chrono::duration<double, std::milli> duration = stop - start;
 
-    std::cout << "Result: " << totalResult << std::endl;
-    std::cout << "Execution time: " << duration.count() << " ms" << std::endl << std::endl;
+    //std::cout << "Result: " << totalResult << std::endl;
+    //std::cout << "Execution time: " << duration.count() << " ms" << std::endl << std::endl;
 
     return duration.count();
 }
 
-void printMyAlgorithmKDependence(std::vector<int> arr)
+void printMyAlgorithmKDependence(std::vector<int>& arr)
 {
     std::cout << "My Algorithm" << std::endl;
+    std::cout << "K" << "\t\t" << "Time, ms" << std::endl;
 
     int K = 1;
-    std::cout << "K = " << K << std::endl;
-    double time1 = myAlgorithm(K, arr, arr);
+    TimeResult time1("K = 1", myAlgorithm(K, arr, arr));
+    std::cout << K << "\t\t" << time1.result << std::endl;
 
     K = 50;
-    std::cout << "K = " << K << std::endl;
-    double time2 = myAlgorithm(K, arr, arr);
+    TimeResult time2("K = 50", myAlgorithm(K, arr, arr));
+    std::cout << K << "\t\t" << time2.result << std::endl;
 
     K = 100;
-    std::cout << "K = " << K << std::endl;
-    double time3 = myAlgorithm(K, arr, arr);
+    TimeResult time3("K = 100", myAlgorithm(K, arr, arr));
+    std::cout << K << "\t\t" << time3.result << std::endl;
 
     K = 250;
-    std::cout << "K = " << K << std::endl;
-    double time4 = myAlgorithm(K, arr, arr);
+    TimeResult time4("K = 250", myAlgorithm(K, arr, arr));
+    std::cout << K << "\t\t" << time4.result << std::endl;
 
     K = 500;
-    std::cout << "K = " << K << std::endl;
-    double time5 = myAlgorithm(K, arr, arr);
+    TimeResult time5("K = 500", myAlgorithm(K, arr, arr));
+    std::cout << K << "\t\t" << time5.result << std::endl;
 
-    std::vector<double> times = { time1, time2, time3, time4, time5 };
+    std::vector<TimeResult> times = { time1, time2, time3, time4, time5 };
     printMinTime(times);
 }
 
 int main()
 {
-    //std::vector<int> arr = generateRandomVector(300000000);
-    std::vector<int> arr = generateRandomVector(3000); //DEBUG
+    std::vector<int> arr = generateRandomVector(300000000);
+    //std::vector<int> arr = generateRandomVector(300); //DEBUG
 
     std::cout << "EXECUTION POLICY: none" << std::endl;
-    double time1 = measureTransformReduceTime(arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; });
+    TimeResult time1("none", measureTransformReduceTime(arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; }));
 
     std::cout << "EXECUTION POLICY: sequenced policy" << std::endl;
-    double time2 = measureTransformReduceTime(std::execution::seq, arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; });
+    TimeResult time2("sequenced policy", measureTransformReduceTime(std::execution::seq, arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; }));
 
     std::cout << "EXECUTION POLICY: parallel policy" << std::endl;
-    double time3 = measureTransformReduceTime(std::execution::par, arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; });
+    TimeResult time3("parallel policy", measureTransformReduceTime(std::execution::par, arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; }));
 
     std::cout << "EXECUTION POLICY: parallel unsequenced policy" << std::endl;
-    double time4 = measureTransformReduceTime(std::execution::par_unseq, arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; });
+    TimeResult time4("parallel unsequenced policy", measureTransformReduceTime(std::execution::par_unseq, arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; }));
 
     std::cout << "EXECUTION POLICY: unsequenced policy" << std::endl;
-    double time5 = measureTransformReduceTime(std::execution::unseq, arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; });
+    TimeResult time5("unsequenced policy", measureTransformReduceTime(std::execution::unseq, arr.begin(), arr.end(), 0, std::plus<>(), [](int i) { return i * i; }));
 
-    std::vector<double> times = { time1, time2, time3, time4, time5 };
+    std::vector<TimeResult> times = { time1, time2, time3, time4, time5 };
     printMinTime(times);
 
     for (int i = 0; i < 20; i++)
     {
         std::cout << "=";
     }
-    std::cout << std::endl << std::endl;  
+    std::cout << std::endl << std::endl;
 
     printMyAlgorithmKDependence(arr);
 
